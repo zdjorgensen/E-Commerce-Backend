@@ -35,7 +35,7 @@ Product.init(
         isInt: true
       },
     },
-    catetory_id: {
+    category_id: {
       type: DataTypes.INTEGER,
       references: Category.id,
     },

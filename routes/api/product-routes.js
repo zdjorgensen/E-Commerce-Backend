@@ -7,10 +7,21 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', async (req, res) => {
   try {
     const productData = await Product.findAll({
-      include: [{ model: Category, Tag }]
+      include: [
+        { 
+          model: Category,
+          attributes: ['category_name'],
+          model: Tag,
+          attributes: ['tag_name']
+        }
+      ]
     });
-    console.log(productData);
-    res.render('product', productData.get({ plain: true }));
+
+    const products = productData.map((product) => product.get({ plain: true }));
+    console.log(products);
+
+    res.json(products);
+
   } catch (err) {
     res.status(500).json(err);
   }
@@ -20,15 +31,27 @@ router.get('/', async (req, res) => {
 });
 
 // get one product
-router.get('product/:id', async(req, res) => {
+router.get('/products/:id', async (req, res) => {
+  console.log('here');
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
   try {
     const productData = await Product.findByPk(req.params.id, {
-      include: [{ model: Category, Tag }]
+      include: [
+        { 
+          model: Category,
+          attributes: ['category_name'],
+          model: Tag,
+          attributes: ['tag_name']
+        }
+      ]
     });
-    console.log(productData);
-    res.render('product', productData.get({ plain: true }));
+
+    const product = productData.get({ plain: true });
+    console.log(product); 
+
+    res.json(product);
+
   } catch (err) {
     res.status(500).json(err);
   }
@@ -108,8 +131,22 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
+  try {
+    const productData = await Product.destory({
+      where: {
+        id: req.params.id,
+      },
+    });
+    if(!productData) {
+      res.status(404).json({ message: "No product with this id"});
+      return;
+    }
+    res.status(200).json({ message: "Product deleted" });
+  }catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
